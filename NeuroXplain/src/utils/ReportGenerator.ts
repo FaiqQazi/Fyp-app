@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AnalysisResult, ParsedEDF } from '../types';
 
 // Use your new key here
-const GEMINI_API_KEY = "AIzaSyBhuCr43bpepBfapoV9wj7JdaKQDn09Lw8"; 
+const GEMINI_API_KEY = "AIzaSyDyOVFGxUHiEwyR-ilAVElGARtsKE5sjjs"; 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 export const generateEEGReport = async (

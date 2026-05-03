@@ -24,6 +24,18 @@ export interface SignalHeader {
   offset?: number;
 }
 
+
+export interface InterpretationResponse {
+  prediction: number;
+  weights: number[];
+  nodes: { label: string; x: number; y: number }[];
+  links: [string, string][];
+  neighbors: {
+    id: string;
+    signal: number[][];
+  }[];
+}
+
 export interface ParsedEDF {
   header: EDFHeader;
   signals: SignalHeader[];
@@ -55,6 +67,7 @@ export interface RegionSelectorandTopolplotProps {
   isPlaying: boolean;
   setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   formatTime: (t: number) => string;
+  onExplainRequest: (result: AnalysisResult) => void;
 }
 
 export interface AnalysisResult {

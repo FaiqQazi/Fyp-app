@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import RefinementModal from './RefinementModal';
 import { generateEEGReport } from '../utils/ReportGenerator';
+import InterpretationSuite from './InterpretationSuite';
+import { InterpretationResponse } from '../types';
 import * as d3 from 'd3';
 import { 
   Play, 
@@ -51,6 +53,8 @@ const EEGViewer: React.FC<EEGViewerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
+  const [interpretation, setInterpretation] = useState<InterpretationResponse | null>(null);
+  const [isAIProcessing, setIsAIProcessing] = useState(false);
 
   const GRID_COLOR = "#1e293b"; 
   const SIGNAL_COLOR = "#38bdf8"; 
@@ -226,10 +230,36 @@ const EEGViewer: React.FC<EEGViewerProps> = ({
     return `${h}:${m}:${s}`;
   };
 
+  const fetchExplanation = async (box: AnalysisResult) => {
+  setIsAIProcessing(true);
+  setInterpretation(null);
+  try {
+    const samplingRate = 200;
+    const startIdx = Math.floor(box.global_start_time_sec * samplingRate);
+    const signalMatrix = data.data.map(channelArray =>
+      Array.from(channelArray.subarray(startIdx, startIdx + 128))
+    );
+    const response = await fetch("https://e81b-2407-d000-17-3b14-45d6-3ad0-57d3-92d.ngrok-free.app/explain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ signal: signalMatrix })
+    });
+    if (!response.ok) throw new Error("AI Backend failed");
+    const result = await response.json();
+    setInterpretation(result);
+  } catch (err) {
+    console.error("AI interpretation failed:", err);
+    alert("Could not reach AI Backend.");
+  } finally {
+    setIsAIProcessing(false);
+  }
+};
+
   return (
-    <div className="flex flex-col h-screen bg-slate-950 text-slate-200 overflow-hidden font-sans">
+<div className="flex flex-col bg-slate-950 text-slate-200 font-sans overflow-y-auto">
       
       {/* 1. TOP HEADER */}
+      <div className="h-screen flex flex-col overflow-hidden flex-shrink-0">
       <header className="h-16 flex items-center justify-between px-6 bg-slate-900 border-b border-slate-800 z-50">
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-3">
@@ -372,6 +402,7 @@ const EEGViewer: React.FC<EEGViewerProps> = ({
                     isPlaying={isPlaying} 
                     setIsPlaying={setIsPlaying} 
                     formatTime={formatTime} 
+                    onExplainRequest={fetchExplanation}
                 />
             </div>
         </div>
@@ -411,6 +442,32 @@ const EEGViewer: React.FC<EEGViewerProps> = ({
           }}
         />
       )}
+      </div>
+{isAIProcessing && (
+  <div className="fixed inset-0 flex items-center justify-center z-[300] bg-slate-950">
+    <div className="text-center p-8">
+      <div className="relative w-32 h-32 mx-auto mb-8">
+        <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-10"></div>
+        <div className="relative bg-slate-900 border border-indigo-500/30 rounded-3xl w-full h-full flex items-center justify-center shadow-2xl">
+          <Activity className="w-12 h-12 text-indigo-400 animate-pulse" />
+        </div>
+      </div>
+      <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">NeuroXplain AI</h2>
+      <p className="text-slate-400 text-sm font-mono max-w-xs mx-auto leading-relaxed">
+        Searching Prototype Database...
+      </p>
+      <div className="mt-8 w-48 h-1 bg-slate-800 rounded-full mx-auto overflow-hidden">
+        <div className="h-full bg-indigo-500 animate-[loading_2s_ease-in-out_infinite]"></div>
+      </div>
+    </div>
+  </div>
+)}
+
+{interpretation && selectedResult && (
+  <div className="relative z-40 bg-[#020617]">
+    <InterpretationSuite key={selectedResult.window_id} data={interpretation} />
+  </div>
+)}
     </div>
   );
 };
