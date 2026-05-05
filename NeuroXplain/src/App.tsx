@@ -73,7 +73,7 @@ const App: React.FC = () => {
     console.log(`🚀 Sending ${validSignals.length} channels to WAVESAGE Backend...`);
 
     // 5. Send the full montage to the Ngrok Backend
-    const BACKEND_URL = "https://6611-34-67-36-95.ngrok-free.app/analyze_eeg";
+    const BACKEND_URL = "https://2892-34-123-54-156.ngrok-free.app/analyze_eeg";
     
     const response = await fetch(BACKEND_URL, {
       method: "POST",

@@ -239,7 +239,7 @@ const EEGViewer: React.FC<EEGViewerProps> = ({
     const signalMatrix = data.data.map(channelArray =>
       Array.from(channelArray.subarray(startIdx, startIdx + 128))
     );
-    const response = await fetch("https://e81b-2407-d000-17-3b14-45d6-3ad0-57d3-92d.ngrok-free.app/explain", {
+    const response = await fetch("https://5c7a-2407-d000-17-3b14-29d6-56e5-21f6-8c12.ngrok-free.app/explain", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ signal: signalMatrix })

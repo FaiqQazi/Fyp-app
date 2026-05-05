@@ -1,7 +1,7 @@
 // src/utils/xaiService.ts
 import { AnalysisResult } from '../types';
 
-const BACKEND_URL = "https://7d0d-35-247-178-218.ngrok-free.app/analyze_eeg";
+const BACKEND_URL = "https://2892-34-123-54-156.ngrok-free.app/analyze_eeg";
 
 export const analyzeSegment = async (
   signal: number[], 
